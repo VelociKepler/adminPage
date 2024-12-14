@@ -7,7 +7,7 @@ const Sidebar = ({ token }) => {
   const links = [
     { path: "/add", label: "Add Product" },
     { path: "/list", label: "Product List" },
-    { path: "/orders", label: "Orders" },
+    { path: "/dashboard", label: "Dashboard" },
   ];
 
   // Sidebar is visible only when the user is logged in

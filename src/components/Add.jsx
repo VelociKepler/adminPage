@@ -1,14 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import ColorPicker from './Colorpicker.jsx'; // Import the new ColorPicker component
 
 const Add = ({ backendUrl, token }) => {
-  const [imageUrls, setImageUrls] = useState([]); // Array to store uploaded Cloudinary image URLs
+  const [imageUrls, setImageUrls] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [pricing, setPricing] = useState("");
   const [category, setCategory] = useState("");
-  const [color, setColor] = useState([]);
+  const [colors, setColors] = useState([]); // Array to store multiple colors
   const [stock, setStock] = useState({ total: "", status: "in_stock" });
   const [metadata, setMetadata] = useState({
     brand: "",
@@ -18,15 +19,11 @@ const Add = ({ backendUrl, token }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = ["Electronics", "Clothing", "Furniture", "Toys"];
-  const availableColors = ["Red", "Blue", "Green", "Yellow", "Black", "White"];
+  const categories = ["bed", "chair", "sofa", "table"];
   const stockStatuses = ["in_stock", "out_of_stock", "low_stock"];
 
-  // Cloudinary Configurations (read from environment variables)
   const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const cloudinaryPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-  // Handle image uploads for Cloudinary
   const handleImageUpload = async (file) => {
     if (!file) return;
 
@@ -52,7 +49,7 @@ const Add = ({ backendUrl, token }) => {
           formData
       );
 
-      const url = response.data.secure_url; // Get the secure Cloudinary URL
+      const url = response.data.secure_url;
       setImageUrls((prevUrls) => [...prevUrls, url]);
       toast.success("Image uploaded successfully!");
     } catch (error) {
@@ -63,20 +60,22 @@ const Add = ({ backendUrl, token }) => {
     }
   };
 
-  // Handle selecting and toggling colors
-  const handleColorChange = (selectedColor) => {
-    setColor((prevColors) =>
-        prevColors.includes(selectedColor)
-            ? prevColors.filter((color) => color !== selectedColor)
-            : [...prevColors, selectedColor]
-    );
+  const addColor = (color) => {
+    if (!colors.includes(color)) {
+      setColors((prevColors) => [...prevColors, color]);
+    } else {
+      toast.info("Color already selected");
+    }
   };
 
-  // Handle the form submission
+
+  const removeColor = (colorToRemove) => {
+    setColors(colors.filter(color => color !== colorToRemove));
+  };
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // Validate required inputs
     if (!name || !description || !pricing || !category || !stock.total) {
       toast.error("Please complete all required fields.");
       return;
@@ -90,7 +89,6 @@ const Add = ({ backendUrl, token }) => {
     setIsSubmitting(true);
 
     try {
-      // Prepare the payload for the backend
       const payload = {
         name,
         description,
@@ -100,7 +98,7 @@ const Add = ({ backendUrl, token }) => {
           total: parseInt(stock.total, 10),
           status: stock.status,
         },
-        color,
+        color: colors, // Store multiple colors as an array
         metadata: {
           brand: metadata.brand,
           weight: parseFloat(metadata.weight),
@@ -110,23 +108,21 @@ const Add = ({ backendUrl, token }) => {
             length: parseFloat(metadata.dimensions.length),
           },
         },
-        images: imageUrls, // Cloudinary image URLs
+        images: imageUrls,
       };
 
-      // Send the request to the backend
       const response = await axios.post(`${backendUrl}/api/products`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.data.success) {
         toast.success("Product added successfully!");
-
         // Reset all form inputs
         setName("");
         setDescription("");
         setPricing("");
         setCategory("");
-        setColor([]);
+        setColors([]); // Clear color array
         setStock({ total: "", status: "in_stock" });
         setMetadata({
           brand: "",
@@ -146,10 +142,10 @@ const Add = ({ backendUrl, token }) => {
   };
 
   return (
-      <form
-          onSubmit={onSubmitHandler}
-          className="flex flex-col w-full items-start gap-4"
-      >
+    <form
+      onSubmit={onSubmitHandler}
+      className="flex flex-col w-full items-start gap-4"
+    >
         {/* Upload Images */}
         <div className="w-full">
           <p className="mb-2">Upload Images (Max: 4)</p>
@@ -214,19 +210,24 @@ const Add = ({ backendUrl, token }) => {
           ))}
         </select>
 
-        {/* Color Selection */}
-        <div className="flex items-center gap-2">
-          {availableColors.map((clr) => (
-              <label className="flex items-center gap-1" key={clr}>
-                <input
-                    type="checkbox"
-                    checked={color.includes(clr)}
-                    onChange={() => handleColorChange(clr)}
-                />
-                <span>{clr}</span>
-              </label>
-          ))}
-        </div>
+      {/* Color Picker Section */}
+      <div className="w-full">
+        <p className="mb-2 font-semibold">Select Colors:</p>
+        {/* <ColorPicker 
+          mode="input" // or "input" nakub
+          maxColors={5}
+          onColorSelect={(selectedColors) => {
+            setColors(selectedColors);
+          }}
+        /> */}
+        <ColorPicker 
+          mode="circle" // circle or "input" nakub
+          maxColors={5}
+          onColorSelect={(selectedColors) => {
+            setColors(selectedColors);
+          }}
+        />
+      </div>
 
         {/* Stock Info */}
         <input

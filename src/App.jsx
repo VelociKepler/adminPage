@@ -5,13 +5,13 @@ import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import Login from "./components/Login";
 import Add from "./components/Add";
 import List from "./components/List";
-import Orders from "./components/Orders";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
 
 // Load backend URL from environment variables, with a fallback to localhost
 export const backendUrl =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 // A constant to store the app's preferred currency symbol
 export const currency = "$";
@@ -76,17 +76,19 @@ function App() {
                             }
                         />
 
-                        {/* Orders Route */}
+                        {/* Dashboard Route */}
                         <Route
-                            path="/orders"
+                            path="/dashboard"
                             element={
                                 token ? (
-                                    <Orders backendUrl={backendUrl} token={token} />
+                                    <Dashboard backendUrl={backendUrl} token={token} />
                                 ) : (
                                     <Navigate replace to="/" />
                                 )
                             }
                         />
+
+
                     </Routes>
                 </div>
             </main>
