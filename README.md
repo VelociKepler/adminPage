@@ -6,7 +6,7 @@ https://ordbit-rexadmin-page-31ga4muhi-thiramet-phuthongs-projects.vercel.app
 # Feature avalible
 - Creat
 - Read
-- Update( upcoming...)
+- Update
 - Delete
 
-# Login with email and password in .env
+# Login with email and password in config .env
